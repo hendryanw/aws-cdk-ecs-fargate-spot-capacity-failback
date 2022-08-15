@@ -43,7 +43,7 @@ export class EcsFargateSpotCapacityFailbackStack extends Stack {
     const lambdaHandler = new lambda.Function(this, 'ecs-fargate-spot-capacity-failback-handler', {
       runtime: lambda.Runtime.NODEJS_16_X,
       handler: 'index.handler',
-      code: lambda.Code.fromInline(`exports.handler = handler.toString()`)
+      code: lambda.Code.fromAsset('lambdas/ecs-fargate-spot-capacity-failback-handler/index.js')
     });
 
     // Mapping the EventBridge rule to trigger the Lambda function
