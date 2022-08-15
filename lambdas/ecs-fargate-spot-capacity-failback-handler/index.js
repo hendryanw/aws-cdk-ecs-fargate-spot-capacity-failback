@@ -33,7 +33,7 @@ exports.handler =  async function(event, context) {
   try {
     console.log(`Updating ${clusterName}/${serviceName} to fully use FARGATE capacity.`)
     const results = await ecs.updateService(params).promise();
-    console.log(results);
+    console.log('SUCCESS: ' + JSON.stringify(results, null, 2));
   }
   catch (err) {
     console.log(err, err.stack);
