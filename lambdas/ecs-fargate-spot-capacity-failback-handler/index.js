@@ -3,7 +3,7 @@ const ecs = new AWS.ECS();
 
 exports.handler =  async function(event, context) {
   // Log the full event
-  console.log("EVENT: \n" + JSON.stringify(event, null, 2));
+  console.log("RECEIVING EVENT: \n" + JSON.stringify(event, null, 2));
   
   // Get cluster and service name
   const splitArn = event.resources[0].split('/');
@@ -23,19 +23,21 @@ exports.handler =  async function(event, context) {
       },
       {
         capacityProvider: 'FARGATE_SPOT',
+        base: 0,
         weight: 0
       }
     ]
   };
 
   // Updating the affected service
-  ecs.updateService(params, function(err, data) {
-    if (err) {
-      console.error(err, err.stack);
-      throw err;
-    }
-    else {
-      console.log(data);
-    }
-  });
+  try {
+    console.log(`Updating ${clusterName}/${serviceName} to fully use FARGATE capacity.`)
+    const results = await ecs.updateService(params).promise();
+    console.log(results);
+  }
+  catch (err) {
+    console.log(err, err.stack);
+    throw err;
+  }
+
 }

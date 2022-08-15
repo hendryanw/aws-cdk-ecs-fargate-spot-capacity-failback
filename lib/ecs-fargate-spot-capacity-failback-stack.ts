@@ -1,6 +1,7 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as cdk from 'aws-cdk-lib';
+import * as iam from 'aws-cdk-lib/aws-iam';
 import * as events from 'aws-cdk-lib/aws-events';
 import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as sqs from 'aws-cdk-lib/aws-sqs';
@@ -43,7 +44,11 @@ export class EcsFargateSpotCapacityFailbackStack extends Stack {
     const lambdaHandler = new lambda.Function(this, 'ecs-fargate-spot-capacity-failback-handler', {
       runtime: lambda.Runtime.NODEJS_16_X,
       handler: 'index.handler',
-      code: lambda.Code.fromAsset('lambdas/ecs-fargate-spot-capacity-failback-handler/index.js')
+      code: lambda.Code.fromAsset('lambdas/ecs-fargate-spot-capacity-failback-handler/'),
+      initialPolicy: [ new iam.PolicyStatement({
+        actions: ['ecs:UpdateService'],
+        resources: ['*']
+      })]
     });
 
     // Mapping the EventBridge rule to trigger the Lambda function
@@ -55,12 +60,10 @@ export class EcsFargateSpotCapacityFailbackStack extends Stack {
 
     // SNS Topic and Subscription to receive email notification.
     const snsTopic = new sns.Topic(this, 'sns-topic', {
-      displayName: 'SNS Topic about ECS Fargate Spot capacity unavailability events',
+      displayName: 'Notifications: ECS Fargate Spot events capacity unavailable',
       topicName: 'fargate-spot-capacity-notification-topic'
     });
-    snsTopic.addSubscription(new subscriptions.EmailSubscription(props.emailAddress, {
-      json: true
-    }));
+    snsTopic.addSubscription(new subscriptions.EmailSubscription(props.emailAddress));
     
     // Dead letter queue for troubleshooting events that has been failed to be processed by the SNS
     const snsDlq = new sqs.Queue(this, 'sns-deadletter-queue');
