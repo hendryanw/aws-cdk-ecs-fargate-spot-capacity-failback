@@ -1,4 +1,4 @@
-# AWS ECS Fargate Spot Capacity Failback
+# Amazon ECS Fargate Spot Capacity Failback
 
 ## Overview
 
